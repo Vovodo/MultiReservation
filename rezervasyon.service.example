@@ -1,0 +1,23 @@
+[Unit]
+Description=Rezervasyon Sistemi
+After=network.target postgresql.service
+
+[Service]
+User=www-data
+Group=www-data
+WorkingDirectory=/var/www/rezervasyon-sistemi
+ExecStart=/var/www/rezervasyon-sistemi/venv/bin/gunicorn --workers 4 --bind 0.0.0.0:5000 wsgi:app
+Restart=always
+RestartSec=10
+StandardOutput=journal
+StandardError=journal
+SyslogIdentifier=rezervasyon
+Environment="PATH=/var/www/rezervasyon-sistemi/venv/bin"
+Environment="PYTHONPATH=/var/www/rezervasyon-sistemi"
+# Şu satırları .env kullanmak yerine buraya ekleyebilirsiniz (gerek duyarsanız)
+# Environment="FLASK_ENV=production"
+# Environment="FLASK_DEBUG=0"
+# Environment="LOG_LEVEL=INFO"
+
+[Install]
+WantedBy=multi-user.target

@@ -1,0 +1,32 @@
+[program:reservation_system]
+command=/path/to/your/venv/bin/gunicorn --workers 4 --bind 0.0.0.0:5000 --log-level=info wsgi:app
+directory=/path/to/your/project
+user=your_username
+autostart=true
+autorestart=true
+redirect_stderr=true
+stdout_logfile=/path/to/your/project/logs/supervisor.log
+environment=
+    FLASK_ENV="production",
+    FLASK_DEBUG="0",
+    LOG_LEVEL="INFO"
+
+[supervisord]
+logfile=/path/to/your/project/logs/supervisord.log
+logfile_maxbytes=50MB
+logfile_backups=10
+loglevel=info
+pidfile=/tmp/supervisord.pid
+nodaemon=false
+minfds=1024
+minprocs=200
+
+[supervisorctl]
+serverurl=unix:///tmp/supervisor.sock
+
+[unix_http_server]
+file=/tmp/supervisor.sock
+chmod=0700
+
+[rpcinterface:supervisor]
+supervisor.rpcinterface_factory = supervisor.rpcinterface:make_main_rpcinterface

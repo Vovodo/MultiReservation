@@ -1,0 +1,68 @@
+server {
+    listen 80;
+    server_name rezervasyon.sizin-domain-adiniz.com;
+    
+    # Statik dosyalar için
+    location /static {
+        alias /var/www/rezervasyon-sistemi/static;
+        expires 30d;
+        add_header Cache-Control "public, max-age=2592000";
+    }
+    
+    # Yüklenen dosyalar için
+    location /uploads {
+        alias /var/www/rezervasyon-sistemi/uploads;
+        expires 30d;
+        add_header Cache-Control "public, max-age=2592000";
+    }
+    
+    # Proxy yapılandırması
+    location / {
+        proxy_pass http://localhost:5000;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+        proxy_connect_timeout 60s;
+        proxy_read_timeout 60s;
+        proxy_send_timeout 60s;
+    }
+    
+    # Telegram webhook için (isteğe bağlı)
+    location /webhook {
+        proxy_pass http://localhost:5000/webhook;
+        proxy_http_version 1.1;
+        proxy_set_header Upgrade $http_upgrade;
+        proxy_set_header Connection 'upgrade';
+        proxy_set_header Host $host;
+        proxy_cache_bypass $http_upgrade;
+        proxy_connect_timeout 120s;
+        proxy_read_timeout 120s;
+        proxy_send_timeout 120s;
+    }
+    
+    # Nginx loglama
+    access_log /var/www/rezervasyon-sistemi/logs/nginx_access.log;
+    error_log /var/www/rezervasyon-sistemi/logs/nginx_error.log;
+    
+    # SSL eklediğinizde bu satırları silerek Let's Encrypt'in yapılandırmasını kullanın
+}
+
+# SSL kurulumu sonrası Let's Encrypt tarafından eklenecek yapılandırma (örnek)
+#server {
+#    listen 443 ssl http2;
+#    server_name rezervasyon.sizin-domain-adiniz.com;
+#    
+#    ssl_certificate /etc/letsencrypt/live/rezervasyon.sizin-domain-adiniz.com/fullchain.pem;
+#    ssl_certificate_key /etc/letsencrypt/live/rezervasyon.sizin-domain-adiniz.com/privkey.pem;
+#    ssl_trusted_certificate /etc/letsencrypt/live/rezervasyon.sizin-domain-adiniz.com/chain.pem;
+#    
+#    ssl_protocols TLSv1.2 TLSv1.3;
+#    ssl_prefer_server_ciphers on;
+#    ssl_session_cache shared:SSL:10m;
+#    ssl_session_timeout 10m;
+#    ssl_stapling on;
+#    ssl_stapling_verify on;
+#    
+#    # Diğer tüm yapılandırmalar yukarıdaki server bloğundan kopyalanmalıdır
+#}
